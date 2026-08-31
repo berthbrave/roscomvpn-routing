@@ -43,10 +43,15 @@ jobs:
           jq --argjson domains "$DOMAINS" '.DirectSites = (.DirectSites + $domains | unique)' HAPP/DEFAULT.JSON > HAPP/DEFAULT_tmp.JSON
           mv HAPP/DEFAULT_tmp.JSON HAPP/DEFAULT.JSON
 
+      - name: Rebuild deeplink from JSON
+        run: |
+          # Кодируем в base64 без переноса строк и собираем готовую ссылку
+          B64=$(base64 -w0 HAPP/DEFAULT.JSON)
+          echo "happ://routing/onadd/${B64}" > HAPP/DEFAULT.DEEPLINK
+
       - name: Commit and Push
         run: |
-          git add HAPP/DEFAULT.JSON
-          # Если изменений нет, скрипт не упадет с ошибкой
-          git commit -m "Auto-inject custom players into DirectSites" || echo "No changes to commit"
-          # Принудительно пушим в ветку custom
+          # Добавляем в коммит сразу два файла
+          git add HAPP/DEFAULT.JSON HAPP/DEFAULT.DEEPLINK
+          git commit -m "Auto-inject custom players and rebuild deeplink" || echo "No changes to commit"
           git push -f origin custom
