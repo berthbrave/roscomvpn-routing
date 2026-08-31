@@ -1,0 +1,52 @@
+name: Sync and Inject Custom Players
+
+on:
+  schedule:
+    # Запуск каждый день в 02:00 ночи (по UTC)
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Позволяет запускать скрипт вручную кнопкой
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Права на пуш коммитов
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Sync upstream
+        run: |
+          git remote add upstream https://github.com/hydraponique/roscomvpn-routing.git || true
+          git fetch upstream
+          git merge upstream/main -m "Merge upstream"
+
+      - name: Create or checkout custom branch
+        run: |
+          git checkout -B custom
+
+      - name: Inject custom domains with jq
+        run: |
+          # Массив наших плееров
+          DOMAINS='["kodik", "kdk", "alloha", "vcdn", "ashdi", "cdnmovies", "collaps", "hdvb", "vibix", "bazon", "rezka", "anilibria", "jutsu", "shikimori"]'
+          
+          # Умное добавление в DirectSites (без дубликатов)
+          jq --argjson domains "$DOMAINS" '.DirectSites = (.DirectSites + $domains | unique)' HAPP/DEFAULT.JSON > HAPP/DEFAULT_tmp.JSON
+          mv HAPP/DEFAULT_tmp.JSON HAPP/DEFAULT.JSON
+
+      - name: Commit and Push
+        run: |
+          git add HAPP/DEFAULT.JSON
+          # Если изменений нет, скрипт не упадет с ошибкой
+          git commit -m "Auto-inject custom players into DirectSites" || echo "No changes to commit"
+          # Принудительно пушим в ветку custom
+          git push -f origin custom
