@@ -1,5 +1,5 @@
 {
-  "Name": "RoscomVPN",
+  "Name": "RoscomVPN_Fix_Player",
   "GlobalProxy": "true",
   "UseChunkFiles": "true",
   "RemoteDns": "8.8.8.8",
