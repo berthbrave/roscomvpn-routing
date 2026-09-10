@@ -32,7 +32,9 @@ jobs:
       - name: Inject custom domains with jq
         run: |
           DOMAINS='["kodik", "kdk", "alloha", "vcdn", "ashdi", "cdnmovies", "collaps", "hdvb", "vibix", "bazon", "rezka", "anilibria", "jutsu", "shikimori"]'
-          jq --argjson domains "$DOMAINS" '.DirectSites = (.DirectSites + $domains | unique)' HAPP/DEFAULT.JSON > HAPP/DEFAULT_tmp.JSON
+          jq --argjson domains "$DOMAINS" \
+             '.Name = "RoscomVPN_Fix_Player" | .DirectSites = (.DirectSites + $domains | unique)' \
+             HAPP/DEFAULT.JSON > HAPP/DEFAULT_tmp.JSON
           mv HAPP/DEFAULT_tmp.JSON HAPP/DEFAULT.JSON
 
       - name: Rebuild deeplink from JSON
