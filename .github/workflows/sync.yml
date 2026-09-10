@@ -2,8 +2,8 @@ name: Sync and Inject Custom Players
 
 on:
   schedule:
-    # Запуск каждый день в 02:00 ночи (по UTC)
-    - cron: '0 2 * * *'
+    # Запуск каждые день 10 минут
+    - cron: '*/10 * * * *'
   workflow_dispatch: # Позволяет запускать скрипт вручную кнопкой
 
 jobs:
